@@ -1,0 +1,32 @@
+{
+  "name": "seven-tween",
+  "version": "3.0.0",
+  "description": "Simple Tweening Library",
+  "main": "dist/seven-tween.js",
+  "scripts": {
+    "build": "rimraf ./dist && webpack --config ./webpack.config.js --mode production && webpack --config ./webpack.config.js --mode production --minimize"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JayPuff/seven-tween.git"
+  },
+  "keywords": [
+    "tween",
+    "animation"
+  ],
+  "author": "Nicolas Correa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JayPuff/seven-tween/issues"
+  },
+  "homepage": "https://github.com/JayPuff/seven-tween#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "rimraf": "^2.6.3",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
+  },
+  "dependencies": {}
+}
