@@ -158,45 +158,21 @@ sevenTween.to(someObject, 1.5, {value: 100, ease: 'easeInCustom'})
 ```
 
 
-## Tween object methods
+## Cancel or Kill a Tween
 
-By storing the returning value of a *to()* or *fromTo()* call, we can perform a few operations on a tween.
+By storing the returning value of a *to()* or *fromTo()* call, we can kill/stop a tween whenever we want.
 
 ```javascript
 // Create a fromTo tween, and make sure it does not auto play.
-let tween = sevenTween.fromTo(someObject, 10, {color: 0}, { paused: true, color: 255, 
+let killTween = sevenTween.fromTo(someObject, 10, {color: 0}, { color: 255, 
     onComplete: () => {
         console.log('Done! Value should be 255! ... ', someObject.color)
     }
 })
 
-// set progress to halfway through
-tween.progress(0.5)
+// Tween will never Complete.
+killTween()
 
-// set time scale to play at 1/2 speed.
-tween.timeScale(0.5)
-
-// Play tween
-// It will take 10 seconds total because of time scale and progress being set to half.
-// from color: 127.5 -> 255
-tween.play()
-```
-
-
-## Repeating Tweens and Pausing
-```javascript
-// Create a fromTo tween, and repeat it indefinitely
-let tween = sevenTween.fromTo(someObject, 2, {color: 0}, { repeat: true, color: 255, 
-    onComplete: () => {
-        console.log('Done iteration!')
-    }
-})
-
-
-// After a set timeout ... pause the repeating tween.
-setTimeout(() => {
-    tween.pause()
-})
 ```
 
 ## Tabbed out behavior
@@ -208,7 +184,6 @@ To continue all animations no matter what even when tabbed out (Will skip to whe
 ```javascript
 sevenTween.lagSmoothing(false)
 ```
-
 
 
 ## Under Construction
