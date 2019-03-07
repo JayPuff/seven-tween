@@ -7,6 +7,7 @@ module.exports = (env, argv) => ({
         filename: (argv.minimize) ? 'seven-tween.min.js' : 'seven-tween.js',
         libraryTarget: 'umd',
         umdNamedDefine: true,
+        globalObject: 'this'
     },
     module: {
         rules: [

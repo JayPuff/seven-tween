@@ -274,9 +274,9 @@ if(typeof window !== 'undefined') {
 }
 
 // Node Export
-// if (typeof(module) !== "undefined" && module.exports) {
-//     module.exports = sevenTween;
-// }
+if (typeof(module) !== "undefined" && module.exports) {
+    module.exports = sevenTween;
+}
 
 export default sevenTween
     
