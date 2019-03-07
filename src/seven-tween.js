@@ -138,7 +138,7 @@ class SevenTween {
                 tween._timeEllapsed = 1000/60 // First Iteration gets only 1 frame of time ellapsed at 60fps
             }
 
-            tween._progress = tween._timeEllapsed / tween._duration * 1000
+            tween._progress = tween._timeEllapsed / (tween._duration * 1000)
 
             // Clamp progress at 1 max.
             if(tween._progress > 1) {
