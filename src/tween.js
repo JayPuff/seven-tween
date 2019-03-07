@@ -1,4 +1,5 @@
 const emptyFunction = (() => {})
+import helpers from './helpers'
 
 export default class Tween {
     constructor(id, target, tweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
@@ -24,6 +25,14 @@ export default class Tween {
         this._target = target
         this._duration = duration
         this._fromParams = fromParams
+        this._isDOM = false
+
+        if(helpers.isDOMElement(target)) {
+            this._isDOM = true
+            console.log('Target for Tween: DOM Element')
+        } else {
+            console.log('Target for Tween: JS Object')
+        }
 
         if(toParams.ease && typeof toParams.ease == 'function') {
             this._easeFunction = toParams.ease
