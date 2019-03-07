@@ -9,12 +9,8 @@ import rafPolyfill from './requestAnimationFrame'
 const rAF = rafPolyfill.requestAnimationFrame
 const cAF  = rafPolyfill.cancelAnimationFrame
 
+// Tween class represents a single tween of values on one target
 import Tween from './tween'
-
-
-// *********************** //
-// **** TWEEN LIBRARY **** //
-// *********************** //
 
 class SevenTween {
     constructor() {
@@ -31,7 +27,7 @@ class SevenTween {
         this._easeFunctions = easeFunctions
         this._defaultEase = easeFunctions.linear
         
-        // Reserved words
+        // Reserved words / Not Currently in use
         this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay']
 
         // Last time in milliseconds to be used by step()
@@ -52,40 +48,40 @@ class SevenTween {
     }
 
     // Main Tween for defining/creating method used by to(), fromTo(), set()
-    _tween(jsObject, duration, fromParams, toParams) {
-        // Get list of tweens for this object.
-        let tweenList = this._getTweenList(jsObject)
+    _tween(target, duration, fromParams, toParams) {
+        // Get list of existing tweens for this object.
+        let targetTweenList = this._getTweensForTarget(target)
 
         // if applicable, overwrite current existing tween params.
         // If an existing tween of this object exists and shares param names, stop those. This one takes priority. 
-        this._overwriteParams(tweenList, toParams)
+        this._overwriteParams(targetTweenList, toParams)
 
         // If we want to set IMMEDIATELY.
         // @TODO: Cleanly actually immediately apply changes rather than waiting till next step() tick. ?
         if(duration === 0) {
             for(let p in toParams) {
-                jsObject[p] = toParams[p]
+                target[p] = toParams[p]
             }
             return;
         }
 
         // Create a tween object. 
         // Return a way to cancel the tween
-        return this._createTween(jsObject, tweenList, duration, fromParams, toParams)
+        return this._createTween(target, targetTweenList, duration, fromParams, toParams)
     }
     
     
-    to(jsObject, duration, toParams) {
-        return this._tween(jsObject, duration, null, toParams)
+    to(target, duration, toParams) {
+        return this._tween(target, duration, null, toParams)
     }
 
 
-    fromTo(jsObject, duration, fromParams, toParams) {
-        return this._tween(jsObject, duration, fromParams, toParams)
+    fromTo(target, duration, fromParams, toParams) {
+        return this._tween(target, duration, fromParams, toParams)
     }
 
-    set(jsObject, toParams) {
-        this._tween(jsObject, 0, null, toParams)
+    set(target, toParams) {
+        this._tween(target, 0, null, toParams)
     }
 
     // Add a new ease function to be used internally via string key
@@ -182,8 +178,8 @@ class SevenTween {
         
     }
 
-    _createTween(jsObject, tweenListForObject, duration, fromParams, toParams) {
-        let tween = new Tween(this._assignTweenID(), jsObject, tweenListForObject, duration, fromParams, toParams, this._easeFunctions, this._defaultEase)
+    _createTween(target, tweenListForObject, duration, fromParams, toParams) {
+        let tween = new Tween(this._assignTweenID(), target, tweenListForObject, duration, fromParams, toParams, this._easeFunctions, this._defaultEase)
         this._injectTween(tween)
         return (() => {
             this._killTween(tween)
@@ -227,15 +223,15 @@ class SevenTween {
         tween._killed = true
     }
 
-    // This method is in charge of returning a list of current tweens IDs for a specific JS object
-    _getTweenList(jsObject) {
-        if(jsObject._7tid && this._tweensByTargetID[jsObject._7tid]) { 
-            return this._tweensByTargetID[jsObject._7tid]
+    // This method is in charge of returning a list of current tweens IDs for a specific JS object / Target
+    _getTweensForTarget(target) {
+        if(target._7tid && this._tweensByTargetID[target._7tid]) { 
+            return this._tweensByTargetID[target._7tid]
         } else {
-            jsObject._7tid = this._nextTargetID
+            target._7tid = this._nextTargetID
             this._nextTargetID += 1
-            this._tweensByTargetID[jsObject._7tid] = []
-            return this._tweensByTargetID[jsObject._7tid]
+            this._tweensByTargetID[target._7tid] = []
+            return this._tweensByTargetID[target._7tid]
         }
     }
 
@@ -263,9 +259,7 @@ class SevenTween {
     }
 }
 
-// ******************* //
-// **** EXPORTING **** //
-// ******************* //
+
 const sevenTween = new SevenTween()
 
 // Browser export as a global
@@ -278,5 +272,6 @@ if (typeof(module) !== "undefined" && module.exports) {
     module.exports = sevenTween;
 }
 
+// Module export - Webpack
 export default sevenTween
     
