@@ -25,10 +25,10 @@ class SevenTween {
 
         // Default easing function
         this._easeFunctions = easeFunctions
-        this._defaultEase = easeFunctions.linear
+        this._defaultEase = easeFunctions['linear']
         
         // Reserved words / Not Currently in use
-        this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay']
+        this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay', 'repeat']
 
         // Last time in milliseconds to be used by step()
         // And lagSmoothing which sets deltaTime to 1000/60 if deltaTime was higher than threshold (Ex: Computer froze for a bit, tabbed out of page.)
@@ -89,7 +89,7 @@ class SevenTween {
         this._easeFunctions[name] = func
     }
 
-    // set lagSmoothing, if set to off will continue animations regardless of being tabbed out, freeze, etc.
+    // // set lagSmoothing, if set to off will continue animations regardless of being tabbed out, freeze, etc.
     lagSmoothing(val) {
         if(val == null || val == undefined) return this._lagSmoothing;
         this._lagSmoothing = !!val
@@ -121,7 +121,7 @@ class SevenTween {
             } 
 
 
-            tween._timeEllapsed += deltaTime * tween._timeScale 
+            tween._timeEllapsed += deltaTime
 
             if(tween._progress === 0) {
                 // Force render from Parameters if applicable.
@@ -135,15 +135,15 @@ class SevenTween {
                 // Call start handler if it has not been called.
                 tween._start()
                 if(tween._killed) continue; // In case tween was killed within the start handler.
-                tween._timeEllapsed = 1000/60 * tween._timeScale // First Iteration gets only 1 frame of time ellapsed at 60fps
+                tween._timeEllapsed = 1000/60 // First Iteration gets only 1 frame of time ellapsed at 60fps
             }
 
-            tween._progress = tween._timeEllapsed / tween._durationMS
+            tween._progress = tween._timeEllapsed / tween._duration * 1000
 
             // Clamp progress at 1 max.
             if(tween._progress > 1) {
                 tween._progress = 1
-                tween._timeEllapsed = tween._durationMS
+                tween._timeEllapsed = tween._duration * 1000
             } 
 
             // Render
@@ -152,7 +152,7 @@ class SevenTween {
 
                 // @TODO: depending on param type (to be implemented) convert to appropriate. Ex: string with px, hex/rgb colors
                 // (Debatable since tweening library would start having duties that are not necessarily theirs)
-                tween._target[p] = tween._easeFunction(tween._progress, tween._timeEllapsed, tween._initialTarget[p], (tween._toParams[p] - tween._initialTarget[p]), tween._durationMS)
+                tween._target[p] = tween._easeFunction(tween._progress, tween._timeEllapsed, tween._initialTarget[p], (tween._toParams[p] - tween._initialTarget[p]), tween._duration * 1000)
             }
 
             // Run onUpdate callback and pass it the current progress [0, 1]

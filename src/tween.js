@@ -7,12 +7,12 @@ export default class Tween {
 
     _init(id, target,tweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
         if(!target) {
-            console.warn('Created a tween with no target object assigned.', {target: target, duration: duration, params: toParams})
+            // console.warn('Created a tween with no target object assigned.', {target: target, duration: duration, params: toParams})
             target = {}
         }
 
         if(!duration || isNaN(duration) || typeof duration !== 'number' || duration < 0) {
-            console.warn('Tween Duration not specified or invalid.', {target: target, duration: duration, params: toParams})
+            // console.warn('Tween Duration not specified or invalid.', {target: target, duration: duration, params: toParams})
             duration = 0
         }
 
@@ -23,8 +23,6 @@ export default class Tween {
         this._timeEllapsed = 0
         this._target = target
         this._duration = duration
-        this._durationMS = duration * 1000
-        this._timeScale = 1
         this._fromParams = fromParams
 
         if(toParams.ease && typeof toParams.ease == 'function') {

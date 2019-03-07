@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = (env, argv) => ({
-    entry: path.join(__dirname, './src/index.js'),
+    entry: path.join(__dirname, './src/seven-tween.js'),
     output: {
         path: path.join(__dirname, './dist'),
         filename: (argv.minimize) ? 'seven-tween.min.js' : 'seven-tween.js',
