@@ -49,6 +49,13 @@ class SevenTween {
 
     // Main Tween for defining/creating method used by to(), fromTo(), set()
     _tween(target, duration, fromParams, toParams) {
+
+        // No target = No Tween
+        if(!target) {
+            console.error('Invalid Tween: Can\'t create a tween with no target object assigned.', {target: target, duration: duration, params: toParams})
+            return (() => {});
+        }
+
         // Get list of existing tweens for this object.
         let targetTweenList = this._getTweensForTarget(target)
 
@@ -124,14 +131,6 @@ class SevenTween {
             tween._timeEllapsed += deltaTime
 
             if(tween._progress === 0) {
-                // Force render from Parameters if applicable.
-                if(tween._fromParams) {
-                    for(let p in tween._fromParams) {
-                        tween._target[p] = tween._fromParams[p]
-                        tween._initialTarget[p] = tween._fromParams[p]
-                    }
-                }
-
                 // Call start handler if it has not been called.
                 tween._start()
                 if(tween._killed) continue; // In case tween was killed within the start handler.
@@ -180,7 +179,7 @@ class SevenTween {
 
     _createTween(target, tweenListForObject, duration, fromParams, toParams) {
         let tween = new Tween(this._assignTweenID(), target, tweenListForObject, duration, fromParams, toParams, this._easeFunctions, this._defaultEase)
-        this._injectTween(tween)
+        if(!tween._invalid) { this._injectTween(tween) } 
         return (() => {
             this._killTween(tween)
         }).bind(this)
