@@ -2,11 +2,11 @@ const emptyFunction = (() => {})
 import helpers from './helpers'
 
 export default class Tween {
-    constructor(id, target, tweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
-        this._init(id, target,tweenList, duration, fromParams, toParams, easeFunctions, defaultEase)
+    constructor(id, target, targetTweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
+        this._init(id, target, targetTweenList, duration, fromParams, toParams, easeFunctions, defaultEase)
     }
 
-    _init(id, target,tweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
+    _init(id, target,targetTweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
 
         this._invalid = false
 
@@ -17,7 +17,7 @@ export default class Tween {
 
         this._id = id
         this._ejected = true
-        this._tweenList = tweenList
+        this._targetTweenList = targetTweenList
         this._progress = 0
         this._timeEllapsed = 0
         this._target = target
@@ -91,8 +91,10 @@ export default class Tween {
             // Render initial fromParams if available.
             if(this._fromParams) {
                 for(let p in this._fromParams) {
-                    this._target[p] = this._fromParams[p]
-                    this._initialTarget[p] = this._fromParams[p]
+                    if(this._activeParams[p]) {
+                        this._target[p] = this._fromParams[p]
+                        this._initialTarget[p] = this._fromParams[p]
+                    }
                 }
             }
 

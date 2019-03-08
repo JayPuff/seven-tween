@@ -17,7 +17,7 @@ class SevenTween {
         // Main array of tweens to iterate over in main loop
         // And 'static' unique ID variable.
         this._tweens = [] 
-        this._nextTweenID = 0
+        this._nextTweenID = 1
         this._nextTargetID = 1
 
         // Using a unique ID given to a target object, access that object and its tweens.
@@ -45,6 +45,13 @@ class SevenTween {
         let assignedTweenID = this._nextTweenID
         this._nextTweenID += 1
         return assignedTweenID
+    }
+
+    // Assign a Target ID and increment inner counter.
+    _assignTargetID() {
+        let assignedTargetID = this._nextTargetID
+        this._nextTargetID += 1
+        return assignedTargetID
     }
 
     // Main Tween for defining/creating method used by to(), fromTo(), set()
@@ -89,6 +96,25 @@ class SevenTween {
 
     set(target, toParams) {
         this._tween(target, 0, null, toParams)
+    }
+
+    // Clear Tweens on target.
+    clear(target) {
+        if(!target) return;
+        let targetTweenList = this._getTweensForTarget(target)
+
+        let t = targetTweenList.length
+        while(t--) {
+            let tweenID = targetTweenList[t]
+            let tt = this._tweens.length
+
+            while(tt--) {
+                let tween = this._tweens[tt]
+                if(tween._id == tweenID) {
+                    this._killTween(tween)
+                }
+            }
+        }
     }
 
     // Add a new ease function to be used internally via string key
@@ -191,7 +217,7 @@ class SevenTween {
             tween._onStarted = false
             tween._onCompleted = false
             this._tweens.push(tween)
-            tween._tweenList.push(tween._id)
+            tween._targetTweenList.push(tween._id)
         }
     }
 
@@ -199,11 +225,11 @@ class SevenTween {
         if(tween._killed) return;
         tween._ejected = true
         
-        let tt = tween._tweenList.length
+        let tt = tween._targetTweenList.length
 
         while(tt--) {
-            if(tween._tweenList[tt] == tween._id) {
-                tween._tweenList.splice(tt,1)
+            if(tween._targetTweenList[tt] == tween._id) {
+                tween._targetTweenList.splice(tt,1)
                 break;
             } 
         }
@@ -227,8 +253,7 @@ class SevenTween {
         if(target._7tid && this._tweensByTargetID[target._7tid]) { 
             return this._tweensByTargetID[target._7tid]
         } else {
-            target._7tid = this._nextTargetID
-            this._nextTargetID += 1
+            target._7tid = this._assignTargetID()
             this._tweensByTargetID[target._7tid] = []
             return this._tweensByTargetID[target._7tid]
         }
@@ -236,10 +261,10 @@ class SevenTween {
 
     // Given a list of tweenIDs and a new params object, overwrite anything applicable in all current tweens.
     // Ex: Stop older tweens from updating a parameter which has been set to tween differently later.
-    _overwriteParams(tweenList, parametersObject) {
-        let t = tweenList.length
+    _overwriteParams(targetTweenList, parametersObject) {
+        let t = targetTweenList.length
         while(t--) {
-            let tweenID = tweenList[t]
+            let tweenID = targetTweenList[t]
             let tt = this._tweens.length
 
             while(tt--) {

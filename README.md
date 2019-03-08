@@ -158,28 +158,43 @@ sevenTween.to(someObject, 1.5, {value: 100, ease: 'easeInCustom'})
 ```
 
 
-## Cancel or Kill a Tween
+## Clear or kill a Tween
 
 By storing the returning value of a *to()* or *fromTo()* call, we can kill/stop a tween whenever we want.
+It will no longer tween values, or run any handlers such as onComplete or onUpdate.
 
 ```javascript
 // Create a fromTo tween, and make sure it does not auto play.
-let killTween = sevenTween.fromTo(someObject, 10, {color: 0}, { color: 255, 
+let clearTween = sevenTween.fromTo(someObject, 10, {color: 0}, { color: 255, 
     onComplete: () => {
         console.log('Done! Value should be 255! ... ', someObject.color)
     }
 })
 
 // Tween will never Complete.
-killTween()
+clearTween()
+```
+
+
+## Clear all tweens on an object
+
+If you prefer to not keep references and make sure tweens are killed individually for a certain object, you can simple clear all tweens for a particular object.
+```javascript
+
+sevenTween.fromTo( anotherObject , 6.5, { length: 5 }, { length: 10})
+sevenTween.fromTo( anotherObject , 2, { opacity:0.5 }, { opacity: 1})
+
+// Kills the tweens defined above.
+sevenTween.clear(anotherObject)
 
 ```
+
 
 ## Tabbed out behavior
 
 By default on the browser environment, assuming we did not have to polyfill requestAnimationFrame, lagSmoothing will make sure that tweens stop animating when tabbed out or upon very sharp spikes of lag > 500ms
 
-To continue all animations no matter what even when tabbed out (Will skip to wherever animation should be timeframe wise):
+It is not recommended to turn off but if you know what you are doing or want specific behaviour, you can disable lagSmoothing which will continue all animations no matter what even when tabbed out (Will skip to wherever animation should be timeframe wise):
 
 ```javascript
 sevenTween.lagSmoothing(false)
