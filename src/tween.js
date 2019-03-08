@@ -88,8 +88,7 @@ export default class Tween {
     _start() {
         if(!this._onStarted) {
 
-            // Do we have from params?
-            // Render initial Params.
+            // Render initial fromParams if available.
             if(this._fromParams) {
                 for(let p in this._fromParams) {
                     this._target[p] = this._fromParams[p]
