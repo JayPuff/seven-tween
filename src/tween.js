@@ -27,9 +27,9 @@ export default class Tween {
 
         if(helpers.isDOMElement(target)) {
             this._isDOM = true
-            console.log('Target for Tween: DOM Element')
+            // console.log('Target for Tween: DOM Element')
         } else {
-            console.log('Target for Tween: JS Object')
+            // console.log('Target for Tween: JS Object')
         }
 
         if(toParams.ease && typeof toParams.ease == 'function') {
