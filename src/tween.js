@@ -7,13 +7,11 @@ export default class Tween {
     }
 
     _init(id, target,tweenList, duration, fromParams, toParams, easeFunctions, defaultEase) {
-        if(!target) {
-            // console.warn('Created a tween with no target object assigned.', {target: target, duration: duration, params: toParams})
-            target = {}
-        }
+
+        this._invalid = false
 
         if(!duration || isNaN(duration) || typeof duration !== 'number' || duration < 0) {
-            // console.warn('Tween Duration not specified or invalid.', {target: target, duration: duration, params: toParams})
+            console.warn('Warning: Tween Duration not specified or invalid. Setting duration to 0', {target: target, duration: duration, params: toParams})
             duration = 0
         }
 
@@ -43,7 +41,18 @@ export default class Tween {
         // https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript
         // Copy basic object 
         // Only really care about numeric values to tween, not functions, date objects, etc.
-        this._initialTarget = JSON.parse(JSON.stringify(target));
+        if(!this._isDOM) {
+            try {
+                this._initialTarget = JSON.parse(JSON.stringify(target));
+            } catch (e) {
+                console.error('Invalid Tween: Target object for tween has a circular reference', {target: target, duration: duration, params: toParams})
+                this._initialTarget = {}
+                this._invalid = true
+            }
+        } else {
+            console.error('Invalid Tween: DOM Objects not yet supported', {target: target, duration: duration, params: toParams})
+            this._invalid = true
+        }
 
         this._toParams = toParams || {}
         this._activeParams = {}
@@ -57,7 +66,9 @@ export default class Tween {
         if (typeof this._onUpdate !== 'function') { this._onUpdate = emptyFunction }
         if (typeof this._onComplete !== 'function') { this._onComplete = emptyFunction }
 
-        this._activate()
+        if(!this._invalid) {
+            this._activate()
+        }
     }
 
 
@@ -76,10 +87,22 @@ export default class Tween {
 
     _start() {
         if(!this._onStarted) {
-            // render initial values
-            for(let p in this._toParams) {
-                this._target[p] = this._initialTarget[p]
+
+            // Do we have from params?
+            // Render initial Params.
+            if(this._fromParams) {
+                for(let p in this._fromParams) {
+                    this._target[p] = this._fromParams[p]
+                    this._initialTarget[p] = this._fromParams[p]
+                }
             }
+
+            // Is this needed or was it only here because of restart
+            // render initial values
+            // for(let p in this._toParams) {
+            //     this._target[p] = this._initialTarget[p]
+            // }
+
             this._onStarted = true
             this._onStart()
         }
