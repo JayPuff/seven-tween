@@ -18,7 +18,7 @@ export default class Tween {
 
         this._target = target // Target Object. We are tweening params on this object.
 
-
+        // Actual Tweening variables 
         this._duration = duration
         this._progress = 0
         this._timeEllapsed = 0
@@ -65,7 +65,6 @@ export default class Tween {
 
 
     _defineParamsDetails(fromParams, toParams, reservedWords) {
-        
         for(let p in toParams) {
 
             // Don't keep reserved words as tweening params
@@ -103,11 +102,9 @@ export default class Tween {
         }
     }
 
-
     _kill() {
         this._killed = true
     }
-
 
     _render() {
         if(this._killed) return

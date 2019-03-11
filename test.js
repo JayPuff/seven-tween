@@ -36,6 +36,7 @@ sevenTween.fromTo(person, 10, {a:1}, { a: 6,
 })
 
 sevenTween.fromTo(person, 5, {b:1}, { b: 7, 
+    ease: 'easeInQuad',
     onStart: () => {
         console.log(`The person initial b is ${person.b}"!`)
     },
