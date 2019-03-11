@@ -45,7 +45,6 @@ export default class Tween {
             // console.log('Target for Tween: JS Object')
         }
 
-        
 
         this._paramDetails = {}
 

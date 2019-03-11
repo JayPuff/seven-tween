@@ -128,7 +128,7 @@ class SevenTween {
 
     _startLoop() {
         if(this._running) return;
-        console.warn('Starting Main SevenTween Loop')
+        // console.warn('Starting Main SevenTween Loop')
         this._running = true
         this._step()
     }
@@ -136,7 +136,7 @@ class SevenTween {
 
     _pauseLoop() {
         if(!this._running) return;
-        console.warn('Stopping Main SevenTween Loop')
+        // console.warn('Stopping Main SevenTween Loop')
         this._running = false
         cAF(this._stepID)
     }
