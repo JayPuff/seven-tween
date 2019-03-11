@@ -3,7 +3,21 @@ Ideally, the smallest possible useful library for tweening values on JS objects 
 Anything extra should be left to some sort of plugin like system: CSS, timelines, etc
 
 Disclaimer: This library is in development.
-Considered Features: Delay, Repeat, Overwrite Mode, Tween between colors and %s, Take HTMLElements as targets, Take Array targets, Don't run step unless we have tweens queued / ongoing ?
+
+Considered Features: 
+
+
+Move Render as a function inside tween...
+Mutate target option? (Sam feedback)
+Tween an objects' nested property? (Complex: Requires being able to send object values and loop through props of those, or 'obj.x.speed' type strings (which disables '.' as a character? (might be fine...)))
+Delay, 
+Repeat, 
+Overwrite Mode, 
+Tween between colors and %s,
+Take HTMLElements as targets,
+Take Array targets,
+Don't run step unless we have tweens queued / ongoing
+
 
 # Installation
 Installing Package
