@@ -33,8 +33,8 @@ class SevenTween {
         this._lagThreshold = 500
         this._lagSmoothing = true
 
-        // Begin main loop
-        this._step()
+        this._stepID = null
+        this._running = false
     }
 
     // Assign a Tween ID and increment inner counter.
@@ -125,10 +125,25 @@ class SevenTween {
         if(val == null || val == undefined) return this._lagSmoothing;
         this._lagSmoothing = !!val
     }
+
+    _startLoop() {
+        if(this._running) return;
+        console.warn('Starting Main SevenTween Loop')
+        this._running = true
+        this._step()
+    }
+
+
+    _pauseLoop() {
+        if(!this._running) return;
+        console.warn('Stopping Main SevenTween Loop')
+        this._running = false
+        cAF(this._stepID)
+    }
     
     // Main loop of tweening library
     _step() {
-        rAF(() => { this._step() })
+        this._stepID = rAF(() => { this._step() })
 
         // Delta time
         let currentTime =  now()
@@ -144,12 +159,22 @@ class SevenTween {
         
         // Loop through existing tweens!
         let t = this._tweens.length
+        if(t == 0) { 
+            this._pauseLoop()
+        }
+
         while(t--) {
             let tween = this._tweens[t]
             if(tween._killed) {
                 console.warn('Development: Killed Tween Exists within main loop. This should not happen.')
                 continue; // Should never have a killed tween in main array of tweens.
             } 
+
+            // Check if we need to delay before starting 
+            tween._delayEllapsed += deltaTime
+            if(tween._delayEllapsed < tween._delay * 1000) {
+                continue; 
+            }
 
 
             // Tween Progress logic 
@@ -204,7 +229,12 @@ class SevenTween {
 
         // Create Tween, and inject into seven tween list of tweens if valid.
         let tween = new Tween(this._assignTweenID(), target, duration, fromParams, toParams, easeFunction)
-        if(!tween._invalid) { this._injectTween(tween) } 
+
+        if(!tween._invalid) { 
+            this._injectTween(tween)
+            this._startLoop()
+        } 
+
         return (() => {
             this._killTween(tween)
         }).bind(this)

@@ -158,6 +158,29 @@ sevenTween.setEase('easeInCustom', (x, t, b, c, d) => { return c*t/d + b })
 sevenTween.to(someObject, 1.5, {value: 100, ease: 'easeInCustom'})
 ```
 
+## Delay option
+
+If you want a tween to start after a specific delay in seconds, the parameter *delay*, can be set on the toParameters
+
+```javascript
+let person = {
+    height: 1
+}
+
+// Tween person's height from its starting value 3 value to 6.
+// The tween will take 5 seconds.
+sevenTween.to(person, 5, { height: 6,
+    delay: 3,
+    onStart() => {
+        console.log('Delayed Start by 3 seconds')
+    },
+    onUpdate: (progress) => {
+        console.log(`The person is ${person.height}" tall!`)
+        console.log(`Growth progress: ${progress * 100}%`)
+    }
+})
+```
+
 
 ## Clear or kill a Tween
 

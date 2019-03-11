@@ -173,17 +173,14 @@ var SevenTween = function () {
         this._easeFunctions = _ease2.default;
         this._defaultEase = _ease2.default['linear'];
 
-        // Reserved words / Not Currently in use
-        this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay'];
-
         // Last time in milliseconds to be used by step()
         // And lagSmoothing which sets deltaTime to 1000/60 if deltaTime was higher than threshold (Ex: Computer froze for a bit, tabbed out of page.)
         this._lastTime = (0, _now2.default)();
         this._lagThreshold = 500;
         this._lagSmoothing = true;
 
-        // Begin main loop
-        this._step();
+        this._stepID = null;
+        this._running = false;
     }
 
     // Assign a Tween ID and increment inner counter.
@@ -294,6 +291,22 @@ var SevenTween = function () {
             if (val == null || val == undefined) return this._lagSmoothing;
             this._lagSmoothing = !!val;
         }
+    }, {
+        key: '_startLoop',
+        value: function _startLoop() {
+            if (this._running) return;
+            console.warn('Starting Main SevenTween Loop');
+            this._running = true;
+            this._step();
+        }
+    }, {
+        key: '_pauseLoop',
+        value: function _pauseLoop() {
+            if (!this._running) return;
+            console.warn('Stopping Main SevenTween Loop');
+            this._running = false;
+            cAF(this._stepID);
+        }
 
         // Main loop of tweening library
 
@@ -302,7 +315,7 @@ var SevenTween = function () {
         value: function _step() {
             var _this = this;
 
-            rAF(function () {
+            this._stepID = rAF(function () {
                 _this._step();
             });
 
@@ -320,11 +333,21 @@ var SevenTween = function () {
 
             // Loop through existing tweens!
             var t = this._tweens.length;
+            if (t == 0) {
+                this._pauseLoop();
+            }
+
             while (t--) {
                 var tween = this._tweens[t];
                 if (tween._killed) {
                     console.warn('Development: Killed Tween Exists within main loop. This should not happen.');
                     continue; // Should never have a killed tween in main array of tweens.
+                }
+
+                // Check if we need to delay before starting 
+                tween._delayEllapsed += deltaTime;
+                if (tween._delayEllapsed < tween._delay * 1000) {
+                    continue;
                 }
 
                 // Tween Progress logic 
@@ -378,10 +401,13 @@ var SevenTween = function () {
             }
 
             // Create Tween, and inject into seven tween list of tweens if valid.
-            var tween = new _tween3.default(this._assignTweenID(), target, duration, fromParams, toParams, easeFunction, this._reserved);
+            var tween = new _tween3.default(this._assignTweenID(), target, duration, fromParams, toParams, easeFunction);
+
             if (!tween._invalid) {
                 this._injectTween(tween);
+                this._startLoop();
             }
+
             return function () {
                 _this2._killTween(tween);
             }.bind(this);
@@ -694,6 +720,10 @@ var _helpers = __webpack_require__(5);
 
 var _helpers2 = _interopRequireDefault(_helpers);
 
+var _reserved = __webpack_require__(6);
+
+var _reserved2 = _interopRequireDefault(_reserved);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -701,15 +731,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var emptyFunction = function emptyFunction() {};
 
 var Tween = function () {
-    function Tween(id, target, duration, fromParams, toParams, easeFunction, reservedWords) {
+    function Tween(id, target, duration, fromParams, toParams, easeFunction) {
         _classCallCheck(this, Tween);
 
-        this._init(id, target, duration, fromParams, toParams, easeFunction, reservedWords);
+        this._init(id, target, duration, fromParams, toParams, easeFunction);
     }
 
     _createClass(Tween, [{
         key: '_init',
-        value: function _init(id, target, duration, fromParams, toParams, easeFunction, reservedWords) {
+        value: function _init(id, target, duration, fromParams, toParams, easeFunction) {
 
             if (!duration || isNaN(duration) || typeof duration !== 'number' || duration < 0) {
                 console.warn('Warning: Tween Duration not specified or invalid. Setting duration to 0', { target: target, duration: duration, params: toParams });
@@ -721,11 +751,14 @@ var Tween = function () {
 
             this._target = target; // Target Object. We are tweening params on this object.
 
-
+            // Actual Tweening variables 
             this._duration = duration;
             this._progress = 0;
             this._timeEllapsed = 0;
             this._easeFunction = easeFunction;
+
+            this._delay = toParams.delay || 0;
+            this._delayEllapsed = 0;
 
             this._useless = true; // Assume tween is useless by default, meaning no active params to tween (overridden), or no toParams that are not reserved keywords 
 
@@ -762,23 +795,22 @@ var Tween = function () {
             }
 
             if (!this._invalid) {
-                this._defineParamsDetails(fromParams || {}, toParams, reservedWords);
+                this._defineParamsDetails(fromParams || {}, toParams);
                 if (this._useless) {
-                    console.warn('Invalid Tween: No parameters to tween indicated');
+                    console.error('Invalid Tween: No parameters to tween indicated', { target: target, duration: duration, params: toParams });
                     this._invalid = true;
                 }
             }
         }
     }, {
         key: '_defineParamsDetails',
-        value: function _defineParamsDetails(fromParams, toParams, reservedWords) {
-
+        value: function _defineParamsDetails(fromParams, toParams) {
             for (var p in toParams) {
 
                 // Don't keep reserved words as tweening params
                 var reserved = false;
-                for (var r in reservedWords) {
-                    if (reservedWords[r] == p) {
+                for (var r in _reserved2.default) {
+                    if (_reserved2.default[r] == p) {
                         reserved = true;
                     }
                 }
@@ -886,6 +918,18 @@ var isDOMElement = function isDOMElement(o) {
 exports.default = {
     isDOMElement: isDOMElement
 };
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay'];
 
 /***/ })
 /******/ ]);

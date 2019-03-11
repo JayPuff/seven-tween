@@ -25,6 +25,9 @@ export default class Tween {
         this._timeEllapsed = 0
         this._easeFunction = easeFunction
 
+        this._delay = toParams.delay || 0
+        this._delayEllapsed = 0
+
         this._useless = true // Assume tween is useless by default, meaning no active params to tween (overridden), or no toParams that are not reserved keywords 
 
         // Keep initial params raw in case we need ...
