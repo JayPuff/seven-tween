@@ -26,9 +26,6 @@ class SevenTween {
         // Default easing function
         this._easeFunctions = easeFunctions
         this._defaultEase = easeFunctions['linear']
-        
-        // Reserved words / Not Currently in use
-        this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay']
 
         // Last time in milliseconds to be used by step()
         // And lagSmoothing which sets deltaTime to 1000/60 if deltaTime was higher than threshold (Ex: Computer froze for a bit, tabbed out of page.)
@@ -206,7 +203,7 @@ class SevenTween {
         }
 
         // Create Tween, and inject into seven tween list of tweens if valid.
-        let tween = new Tween(this._assignTweenID(), target, duration, fromParams, toParams, easeFunction, this._reserved)
+        let tween = new Tween(this._assignTweenID(), target, duration, fromParams, toParams, easeFunction)
         if(!tween._invalid) { this._injectTween(tween) } 
         return (() => {
             this._killTween(tween)

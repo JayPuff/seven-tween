@@ -21,7 +21,7 @@ person.self = person
 
 console.log(person._7tid)
 
-sevenTween.fromTo(person, 10, {a:1}, { a: 6, 
+sevenTween.fromTo(person, 10, {a:1}, { 
     onStart: () => {
         console.log(`The person initial a is ${person.a}"!`)
     },

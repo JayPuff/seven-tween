@@ -1,15 +1,16 @@
 const emptyFunction = (() => {})
 import helpers from './helpers'
+import reservedWords from './reserved'
 
 export default class Tween {
-    constructor(id, target, duration, fromParams, toParams, easeFunction, reservedWords) {
-        this._init(id, target, duration, fromParams, toParams, easeFunction, reservedWords)
+    constructor(id, target, duration, fromParams, toParams, easeFunction) {
+        this._init(id, target, duration, fromParams, toParams, easeFunction)
     }
 
-    _init(id, target, duration, fromParams, toParams, easeFunction, reservedWords) {
+    _init(id, target, duration, fromParams, toParams, easeFunction) {
 
         if(!duration || isNaN(duration) || typeof duration !== 'number' || duration < 0) {
-            console.warn('Warning: Tween Duration not specified or invalid. Setting duration to 0', {target: target, duration: duration, params: toParams})
+            console.warn('Warning: Tween Duration not specified or invalid. Setting duration to 0', { target: target, duration: duration, params: toParams })
             duration = 0
         }
 
@@ -34,7 +35,7 @@ export default class Tween {
 
         if(helpers.isDOMElement(target)) {
             this._isDOM = true
-            console.error('Invalid Tween: DOM Objects not yet supported', {target: target, duration: duration, params: toParams})
+            console.error('Invalid Tween: DOM Objects not yet supported', { target: target, duration: duration, params: toParams })
             this._invalid = true
             // console.log('Target for Tween: DOM Element')
         } else {
@@ -55,16 +56,16 @@ export default class Tween {
         if (typeof this._onComplete !== 'function') { this._onComplete = emptyFunction }
 
         if(!this._invalid) {
-            this._defineParamsDetails(fromParams || {}, toParams, reservedWords)
+            this._defineParamsDetails(fromParams || {}, toParams)
             if(this._useless) {
-                console.warn('Invalid Tween: No parameters to tween indicated')
+                console.error('Invalid Tween: No parameters to tween indicated', { target: target, duration: duration, params: toParams })
                 this._invalid = true
             }
         }
     }
 
 
-    _defineParamsDetails(fromParams, toParams, reservedWords) {
+    _defineParamsDetails(fromParams, toParams) {
         for(let p in toParams) {
 
             // Don't keep reserved words as tweening params
@@ -124,7 +125,6 @@ export default class Tween {
             this._onComplete()
         }
     }
-
 
     _update() {
         if(this._killed) return
