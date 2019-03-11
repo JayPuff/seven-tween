@@ -28,7 +28,7 @@ class SevenTween {
         this._defaultEase = easeFunctions['linear']
         
         // Reserved words / Not Currently in use
-        this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay', 'repeat']
+        this._reserved = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay']
 
         // Last time in milliseconds to be used by step()
         // And lagSmoothing which sets deltaTime to 1000/60 if deltaTime was higher than threshold (Ex: Computer froze for a bit, tabbed out of page.)
@@ -71,7 +71,6 @@ class SevenTween {
         this._overwriteParams(targetTweenList, toParams)
 
         // If we want to set IMMEDIATELY.
-        // @TODO: Cleanly actually immediately apply changes rather than waiting till next step() tick. ?
         if(duration === 0) {
             for(let p in toParams) {
                 target[p] = toParams[p]
@@ -172,13 +171,8 @@ class SevenTween {
             } 
 
             // Render
-            for(let p in tween._toParams) {
-                if(!tween._activeParams[p]) continue; // If parameter is not active, do not tween it.
-
-                // @TODO: depending on param type (to be implemented) convert to appropriate. Ex: string with px, hex/rgb colors
-                // (Debatable since tweening library would start having duties that are not necessarily theirs)
-                tween._target[p] = tween._easeFunction(tween._progress, tween._timeEllapsed, tween._initialTarget[p], (tween._toParams[p] - tween._initialTarget[p]), tween._duration * 1000)
-            }
+            tween._render()
+            
 
             // Run onUpdate callback and pass it the current progress [0, 1]
             tween._onUpdate(tween._progress)
@@ -204,7 +198,7 @@ class SevenTween {
     }
 
     _createTween(target, tweenListForObject, duration, fromParams, toParams) {
-        let tween = new Tween(this._assignTweenID(), target, tweenListForObject, duration, fromParams, toParams, this._easeFunctions, this._defaultEase)
+        let tween = new Tween(this._assignTweenID(), target, tweenListForObject, duration, fromParams, toParams, this._easeFunctions, this._defaultEase, this._reserved)
         if(!tween._invalid) { this._injectTween(tween) } 
         return (() => {
             this._killTween(tween)
@@ -270,10 +264,10 @@ class SevenTween {
             while(tt--) {
                 let tween = this._tweens[tt]
                 if(tween._id == tweenID) {
-                    for(let p in tween._toParams) {
+                    for(let p in tween._paramDetails) {
                         for(let n in parametersObject) {
                             if(n == p) {
-                                tween._activeParams[p] = false
+                                tween._deactivateParam(p)
                             }
                         }
                     }
