@@ -59,16 +59,18 @@ class SevenTween {
 
         // No target = No Tween
         if(!target) {
-            console.error('Invalid Tween: Can\'t create a tween with no target object assigned.', {target: target, duration: duration, params: toParams})
+            console.error('Invalid Tween: Can\'t create a tween with no target object assigned.', { target: target, duration: duration, params: toParams })
             return (() => {});
         }
 
-        // Get list of existing tweens for this object.
-        let targetTweenList = this._getTweensForTarget(target)
+        // Assign target a unique ID if it does not have one.
+        if(!target._7tid) {
+            target._7tid = this._assignTargetID()
+            this._tweensByTargetID[target._7tid] = []
+        }
 
-        // if applicable, overwrite current existing tween params.
-        // If an existing tween of this object exists and shares param names, stop those. This one takes priority. 
-        this._overwriteParams(targetTweenList, toParams)
+        // If an existing tween of this object exists and shares params that are being tweened, stop those. This new tween takes priority.
+        this._overwriteParams(target, toParams)
 
         // If we want to set IMMEDIATELY.
         if(duration === 0) {
@@ -80,7 +82,7 @@ class SevenTween {
 
         // Create a tween object. 
         // Return a way to cancel the tween
-        return this._createTween(target, targetTweenList, duration, fromParams, toParams)
+        return this._createTween(target, duration, fromParams, toParams)
     }
     
     
@@ -153,12 +155,12 @@ class SevenTween {
             } 
 
 
+            // Tween Progress logic 
             tween._timeEllapsed += deltaTime
 
             if(tween._progress === 0) {
                 // Call start handler if it has not been called.
                 tween._start()
-                if(tween._killed) continue; // In case tween was killed within the start handler.
                 tween._timeEllapsed = 1000/60 // First Iteration gets only 1 frame of time ellapsed at 60fps
             }
 
@@ -175,17 +177,14 @@ class SevenTween {
             
 
             // Run onUpdate callback and pass it the current progress [0, 1]
-            tween._onUpdate(tween._progress)
+            tween._update()
 
             // Run onComplete callback and remove the tween from the tweens array for this object's map entry
             // Remove tweens from the main tweens array as well, so it does not get iterated over in main step.
             if(tween._progress == 1) {
                 if(!tween._repeat) { // Repeat does not exist currently.
                     this._ejectTween(tween, t)
-                    // If tween was killed on update function don't run complete.
-                    if(!tween._killed) {
-                        tween._complete()
-                    }
+                    tween._complete()
                 } else {
                     // tween._complete()
                     // tween.restart()
@@ -197,8 +196,17 @@ class SevenTween {
         
     }
 
-    _createTween(target, tweenListForObject, duration, fromParams, toParams) {
-        let tween = new Tween(this._assignTweenID(), target, tweenListForObject, duration, fromParams, toParams, this._easeFunctions, this._defaultEase, this._reserved)
+    _createTween(target, duration, fromParams, toParams) {
+        // Determine ease Function
+        let easeFunction;
+        if(toParams.ease && typeof toParams.ease == 'function') {
+            easeFunction = toParams.ease
+        } else {
+            easeFunction = this._easeFunctions[toParams.ease] || this._defaultEase
+        }
+
+        // Create Tween, and inject into seven tween list of tweens if valid.
+        let tween = new Tween(this._assignTweenID(), target, duration, fromParams, toParams, easeFunction, this._reserved)
         if(!tween._invalid) { this._injectTween(tween) } 
         return (() => {
             this._killTween(tween)
@@ -206,24 +214,22 @@ class SevenTween {
     }
 
     _injectTween(tween) {
-        if(tween._ejected) {
-            tween._ejected = false
-            tween._onStarted = false
-            tween._onCompleted = false
-            this._tweens.push(tween)
-            tween._targetTweenList.push(tween._id)
-        }
+        // Insert into main array
+        this._tweens.push(tween)
+
+        // Insert into array of tweens by Target ID
+        let targetTweenList = this._getTweensForTarget(tween._target)
+        targetTweenList.push(tween._id)
     }
 
     _ejectTween(tween, t) {
-        if(tween._killed) return;
-        tween._ejected = true
         
-        let tt = tween._targetTweenList.length
+        let targetTweenList = this._getTweensForTarget(tween._target)
+        let tt = targetTweenList.length
 
         while(tt--) {
-            if(tween._targetTweenList[tt] == tween._id) {
-                tween._targetTweenList.splice(tt,1)
+            if(targetTweenList[tt] == tween._id) {
+                targetTweenList.splice(tt,1)
                 break;
             } 
         }
@@ -239,7 +245,7 @@ class SevenTween {
                 this._ejectTween(tween, t)
             }
         }
-        tween._killed = true
+        tween._kill()
     }
 
     // This method is in charge of returning a list of current tweens IDs for a specific JS object / Target
@@ -247,15 +253,14 @@ class SevenTween {
         if(target._7tid && this._tweensByTargetID[target._7tid]) { 
             return this._tweensByTargetID[target._7tid]
         } else {
-            target._7tid = this._assignTargetID()
-            this._tweensByTargetID[target._7tid] = []
-            return this._tweensByTargetID[target._7tid]
+            return []
         }
     }
 
     // Given a list of tweenIDs and a new params object, overwrite anything applicable in all current tweens.
     // Ex: Stop older tweens from updating a parameter which has been set to tween differently later.
-    _overwriteParams(targetTweenList, parametersObject) {
+    _overwriteParams(target, parametersObject) {
+        let targetTweenList = this._getTweensForTarget(target)
         let t = targetTweenList.length
         while(t--) {
             let tweenID = targetTweenList[t]
@@ -268,6 +273,10 @@ class SevenTween {
                         for(let n in parametersObject) {
                             if(n == p) {
                                 tween._deactivateParam(p)
+                                if(tween._useless) {
+                                    console.log('found useless tween')
+                                    this._ejectTween(tween, tt)
+                                }
                             }
                         }
                     }

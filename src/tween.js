@@ -2,26 +2,29 @@ const emptyFunction = (() => {})
 import helpers from './helpers'
 
 export default class Tween {
-    constructor(id, target, targetTweenList, duration, fromParams, toParams, easeFunctions, defaultEase, reservedWords) {
-        this._init(id, target, targetTweenList, duration, fromParams, toParams, easeFunctions, defaultEase, reservedWords)
+    constructor(id, target, duration, fromParams, toParams, easeFunction, reservedWords) {
+        this._init(id, target, duration, fromParams, toParams, easeFunction, reservedWords)
     }
 
-    _init(id, target,targetTweenList, duration, fromParams, toParams, easeFunctions, defaultEase, reservedWords) {
-
-        this._invalid = false
+    _init(id, target, duration, fromParams, toParams, easeFunction, reservedWords) {
 
         if(!duration || isNaN(duration) || typeof duration !== 'number' || duration < 0) {
             console.warn('Warning: Tween Duration not specified or invalid. Setting duration to 0', {target: target, duration: duration, params: toParams})
             duration = 0
         }
 
-        this._id = id
-        this._ejected = true
-        this._targetTweenList = targetTweenList
+        this._id = id // SevenTween internal ID assigned to this tween
+        this._invalid = false // Flag to know if this tween is valid and should be started
+
+        this._target = target // Target Object. We are tweening params on this object.
+
+
+        this._duration = duration
         this._progress = 0
         this._timeEllapsed = 0
-        this._target = target
-        this._duration = duration
+        this._easeFunction = easeFunction
+
+        this._useless = true // Assume tween is useless by default, meaning no active params to tween (overridden), or no toParams that are not reserved keywords 
 
         // Keep initial params raw in case we need ...
         this._fromParams = fromParams
@@ -31,33 +34,14 @@ export default class Tween {
 
         if(helpers.isDOMElement(target)) {
             this._isDOM = true
+            console.error('Invalid Tween: DOM Objects not yet supported', {target: target, duration: duration, params: toParams})
+            this._invalid = true
             // console.log('Target for Tween: DOM Element')
         } else {
             // console.log('Target for Tween: JS Object')
         }
 
-        if(toParams.ease && typeof toParams.ease == 'function') {
-            this._easeFunction = toParams.ease
-        } else {
-            this._easeFunction = easeFunctions[toParams.ease] || defaultEase
-        }
         
-        // https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript
-        // Copy basic object 
-        // Only really care about numeric values to tween, not functions, date objects, etc.
-        // if(!this._isDOM) {
-        //     try {
-        //         this._initialTarget = JSON.parse(JSON.stringify(target));
-        //     } catch (e) {
-        //         console.error('Invalid Tween: Target object for tween has a circular reference', {target: target, duration: duration, params: toParams})
-        //         this._initialTarget = {}
-        //         this._invalid = true
-        //     }
-        // } else {
-        //     console.error('Invalid Tween: DOM Objects not yet supported', {target: target, duration: duration, params: toParams})
-        //     // check to Params
-        //     this._invalid = true
-        // }
 
         this._paramDetails = {}
 
@@ -72,11 +56,16 @@ export default class Tween {
 
         if(!this._invalid) {
             this._defineParamsDetails(fromParams || {}, toParams, reservedWords)
+            if(this._useless) {
+                console.warn('Invalid Tween: No parameters to tween indicated')
+                this._invalid = true
+            }
         }
     }
 
 
     _defineParamsDetails(fromParams, toParams, reservedWords) {
+        
         for(let p in toParams) {
 
             // Don't keep reserved words as tweening params
@@ -91,56 +80,75 @@ export default class Tween {
             this._paramDetails[p] = {
                 active: true,
                 fromType: 'number',
-                fromValue: fromParams[p] || this._target[p],
+                fromValue: fromParams[p] || this._target[p] || 0, 
                 toType: 'number', // Only value right now.
                 toValue: toParams[p]
             }
+
+            // Found something to tween at least.
+            this._useless = false
         }
+        
     }
 
     _deactivateParam(param) {
         this._paramDetails[param].active = false
+
+        // Prove you are useful, dumb tween. or SevenTween will kill you
+        this._useless = true
+        for(let p in this._paramDetails) {
+            if(this._paramDetails[p].active) {
+                this._useless = false
+            }
+        }
+    }
+
+
+    _kill() {
+        this._killed = true
     }
 
 
     _render() {
+        if(this._killed) return
+        if(this._onCompleted) return
         for(let p in this._paramDetails) {
             if(!this._paramDetails[p].active) continue; // If parameter is not active, do not tween it.
 
             // @TODO: depending on param type (to be implemented) convert to appropriate. Ex: string with px, hex/rgb colors
-            // (Debatable since tweening library would start having duties that are not necessarily theirs)
             this._target[p] = this._easeFunction(this._progress, this._timeEllapsed, this._paramDetails[p].fromValue, (this._paramDetails[p].toValue - this._paramDetails[p].fromValue), this._duration * 1000)
         }
     }
 
     _complete() {
+        if(this._killed) return
         if(!this._onCompleted) {
             this._onCompleted = true
             this._onComplete()
         }
     }
 
+
+    _update() {
+        if(this._killed) return
+        if(this._onCompleted) return
+        this._onUpdate(this._progress)
+    }
+
     _start() {
-        if(!this._onStarted) {
+        if(this._killed) return
+        if(this._onCompleted) return
+        if(this._onStarted) return
 
-            // Render initial fromParams if available.
 
-            for(let p in this._paramDetails) {
-                if(this._paramDetails[p].active) {
-                    this._target[p] = this._paramDetails[p].fromValue
-                    // this._initialTarget[p] = this._paramDetails[p].fromValue
-                }
+        for(let p in this._paramDetails) {
+            if(this._paramDetails[p].active) {
+                this._target[p] = this._paramDetails[p].fromValue
+                // this._initialTarget[p] = this._paramDetails[p].fromValue
             }
-            
-
-            // Is this needed or was it only here because of restart
-            // render initial values
-            // for(let p in this._toParams) {
-            //     this._target[p] = this._initialTarget[p]
-            // }
-
-            this._onStarted = true
-            this._onStart()
         }
+
+        this._onStarted = true
+        this._onStart()
     }
 }
