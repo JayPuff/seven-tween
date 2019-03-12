@@ -376,13 +376,13 @@ var SevenTween = function () {
                 // Run onComplete callback and remove the tween from the tweens array for this object's map entry
                 // Remove tweens from the main tweens array as well, so it does not get iterated over in main step.
                 if (tween._progress == 1) {
-                    if (!tween._repeat) {
+                    if (!tween._shouldRepeat()) {
                         // Repeat does not exist currently.
                         this._ejectTween(tween, t);
                         tween._complete();
                     } else {
-                        // tween._complete()
-                        // tween.restart()
+                        tween._complete();
+                        tween._restart();
                     }
                 }
             }
@@ -748,6 +748,7 @@ var Tween = function () {
 
             this._id = id; // SevenTween internal ID assigned to this tween
             this._invalid = false; // Flag to know if this tween is valid and should be started
+            this._killed = false; // was the tween killed?
 
             this._target = target; // Target Object. We are tweening params on this object.
 
@@ -757,8 +758,13 @@ var Tween = function () {
             this._timeEllapsed = 0;
             this._easeFunction = easeFunction;
 
+            // Delay variables
             this._delay = toParams.delay || 0;
             this._delayEllapsed = 0;
+
+            // Repeat Variables
+            this._repeat = toParams.repeat || 0;
+            this._repeats = 0;
 
             this._useless = true; // Assume tween is useless by default, meaning no active params to tween (overridden), or no toParams that are not reserved keywords 
 
@@ -867,6 +873,25 @@ var Tween = function () {
             }
         }
     }, {
+        key: '_restart',
+        value: function _restart() {
+            this._onStarted = false;
+            this._onCompleted = false;
+            this._delayEllapsed = 0;
+            this._timeEllapsed = 0;
+            this._progress = 0;
+            this._repeats += 1;
+        }
+    }, {
+        key: '_shouldRepeat',
+        value: function _shouldRepeat() {
+            console.log(this, this._killed, this._useless, this._repeat, this._repeats);
+            if (this._killed || this._useless) return false;
+            if (this._repeat < 0) return true;
+            if (this._repeats < this._repeat) return true;
+            return false;
+        }
+    }, {
         key: '_update',
         value: function _update() {
             if (this._killed) return;
@@ -929,7 +954,7 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay'];
+exports.default = ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay', 'repeat'];
 
 /***/ })
 /******/ ]);

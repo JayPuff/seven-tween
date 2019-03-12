@@ -180,6 +180,30 @@ sevenTween.to(person, 5, { height: 6,
 })
 ```
 
+## Repeat option
+
+If you want a tween to repeat, the parameter *repeat*, can be set on the toParameters; Setting it to a specific number will make the tween repeat that amount of times, setting it to to -1 will repeat the tween forever, the only thing that will stop this repeat behaviour is killing the tween (As shown in the next section)
+
+```javascript
+let person = {
+    height: 1
+}
+
+// Tween person's height from its starting value 3 value to 6.
+// The tween will take 5 seconds.
+sevenTween.to(person, 5, { height: 6,
+    repeat: -1,
+    onStart() => {
+        console.log('Started or Restarted the tween!')
+    },
+    onUpdate: (progress) => {
+        console.log(`The person is ${person.height}" tall!`)
+        console.log(`Growth progress: ${progress * 100}%`)
+        console.log(`Time to re-do it!`)
+    }
+})
+```
+
 
 ## Clear or kill a Tween
 
@@ -218,6 +242,8 @@ sevenTween.clear(anotherObject)
 When it comes to tweens affecting the same object, whether it's a *fromTo*, a *to*, or even a *set*, priority regarding tweening a particular property always goes to the latest tween declared, even if an older tween had a delay.
 
 That means: Old tweens will still keep running, their onUpdate handlers and onComplete handlers will still run, but they will no longer be mutating properties that have been taken over by newer declared tweens.
+
+Important: If all the properties on a 'repeat' tween have been overriden, the tween will do one last onComplete call when it is done that iteration, and it will no longer repeat after that. even if repeat was set to *-1*
 
 
 
