@@ -295,7 +295,7 @@ var SevenTween = function () {
         key: '_startLoop',
         value: function _startLoop() {
             if (this._running) return;
-            console.warn('Starting Main SevenTween Loop');
+            // console.warn('Starting Main SevenTween Loop')
             this._running = true;
             this._step();
         }
@@ -303,7 +303,7 @@ var SevenTween = function () {
         key: '_pauseLoop',
         value: function _pauseLoop() {
             if (!this._running) return;
-            console.warn('Stopping Main SevenTween Loop');
+            // console.warn('Stopping Main SevenTween Loop')
             this._running = false;
             cAF(this._stepID);
         }
@@ -482,10 +482,10 @@ var SevenTween = function () {
                             for (var n in parametersObject) {
                                 if (n == p) {
                                     tween._deactivateParam(p);
-                                    if (tween._useless) {
-                                        console.log('found useless tween');
-                                        this._ejectTween(tween, tt);
-                                    }
+                                    // if(tween._useless) {
+                                    //     console.log('found useless tween')
+                                    //     this._ejectTween(tween, tt)
+                                    // }
                                 }
                             }
                         }
