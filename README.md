@@ -213,15 +213,13 @@ sevenTween.clear(anotherObject)
 ```
 
 
-## Overriding behaviour of tweens
+## Multiple Tweens tweening same property on same object
 
 When it comes to tweens affecting the same object, whether it's a *fromTo*, a *to*, or even a *set*, priority regarding tweening a particular property always goes to the latest tween declared, even if an older tween had a delay.
 
-That means: Old tweens will still keep running, but properties you target in newer tweens will immediately stop that property from being tweened within older tweens that share that same property. 
+That means: Old tweens will still keep running, their onUpdate handlers and onComplete handlers will still run, but they will no longer be mutating properties that have been taken over by newer declared tweens.
 
-Important: If a tween's properties has been entirely overriden by newer tweens, the tween is deemed useless and handlers will no longer run. If you still need a particular 
 
-..... not sure if I wanna run onComplete/onUpdate etc...
 
 ## Tabbed out behavior
 

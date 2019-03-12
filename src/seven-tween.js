@@ -300,10 +300,10 @@ class SevenTween {
                         for(let n in parametersObject) {
                             if(n == p) {
                                 tween._deactivateParam(p)
-                                if(tween._useless) {
-                                    console.log('found useless tween')
-                                    this._ejectTween(tween, tt)
-                                }
+                                // if(tween._useless) {
+                                //     console.log('found useless tween')
+                                //     this._ejectTween(tween, tt)
+                                // }
                             }
                         }
                     }
