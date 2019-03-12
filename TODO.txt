@@ -2,10 +2,11 @@ Considered Features:
 
 Mutate target option? (Sam feedback)
 Tween an objects' nested property? (Complex: Requires being able to send object values and loop through props of those, or 'obj.x.speed' type strings (which disables '.' as a character? (might be fine...)))
-Delay,  <---
-Repeat, 
-Overwrite Mode, 
+Delay,  <--- DONE
+Repeat, <--- DONE
+yoyo repeat?,
+Overwrite Mode, (complexity???) 
 Tween between colors and units and %s, <---
 Take HTMLElements as targets,
-Take Array targets,
-Don't run step unless we have tweens queued / ongoing
+Take Array targets (make many tweens and return a function that kills all of them??? is that it??? no... onComplete gets complicated etc.)
+Don't run step unless we have tweens queued / ongoing <--- DONE
