@@ -21,7 +21,7 @@ person.self = person
 
 // console.log(person._7tid)
 
-sevenTween.fromTo(person, 5, {height: 2}, { height: 4, delay: 7, 
+sevenTween.fromTo(person, 5, {height: 2}, { height: 4, delay: 5,
     onStart: () => {
         console.log(`The person initial height is ${person.height}"!`)
     },
@@ -32,9 +32,9 @@ sevenTween.fromTo(person, 5, {height: 2}, { height: 4, delay: 7,
     onComplete: () => {
         console.log('Person has reached their max height!')
         console.log(sevenTween)
-        setTimeout(() => {
-            sevenTween.to(person, 1, { height: 1, onComplete: () => { console.log('Done', person ) }})
-        }, 1500)
+        // setTimeout(() => {
+        //     sevenTween.to(person, 1, { height: 1, onComplete: () => { console.log('Done', person ) }})
+        // }, 1500)
     }
 })
 

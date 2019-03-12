@@ -16,6 +16,7 @@ export default class Tween {
 
         this._id = id // SevenTween internal ID assigned to this tween
         this._invalid = false // Flag to know if this tween is valid and should be started
+        this._killed = false // was the tween killed?
 
         this._target = target // Target Object. We are tweening params on this object.
 
@@ -25,8 +26,13 @@ export default class Tween {
         this._timeEllapsed = 0
         this._easeFunction = easeFunction
 
+        // Delay variables
         this._delay = toParams.delay || 0
         this._delayEllapsed = 0
+
+        // Repeat Variables
+        this._repeat = toParams.repeat || 0
+        this._repeats = 0
 
         this._useless = true // Assume tween is useless by default, meaning no active params to tween (overridden), or no toParams that are not reserved keywords 
 
@@ -126,6 +132,23 @@ export default class Tween {
             this._onCompleted = true
             this._onComplete()
         }
+    }
+
+    _restart() {
+        this._onStarted = false
+        this._onCompleted = false
+        this._delayEllapsed = 0
+        this._timeEllapsed = 0
+        this._progress = 0
+        this._repeats += 1
+    }
+
+    _shouldRepeat() {
+        console.log(this, this._killed, this._useless, this._repeat, this._repeats)
+        if(this._killed || this._useless) return false;
+        if(this._repeat < 0) return true;
+        if(this._repeats < this._repeat) return true;
+        return false;
     }
 
     _update() {

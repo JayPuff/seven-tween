@@ -204,12 +204,12 @@ class SevenTween {
             // Run onComplete callback and remove the tween from the tweens array for this object's map entry
             // Remove tweens from the main tweens array as well, so it does not get iterated over in main step.
             if(tween._progress == 1) {
-                if(!tween._repeat) { // Repeat does not exist currently.
+                if(!tween._shouldRepeat()) { // Repeat does not exist currently.
                     this._ejectTween(tween, t)
                     tween._complete()
                 } else {
-                    // tween._complete()
-                    // tween.restart()
+                    tween._complete()
+                    tween._restart()
                 }
             }
             

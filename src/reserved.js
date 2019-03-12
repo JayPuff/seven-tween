@@ -1,1 +1,1 @@
-export default ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay']
+export default ['onStart', 'onUpdate', 'onComplete', 'ease', 'delay', 'repeat']
