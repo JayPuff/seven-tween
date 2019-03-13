@@ -70,6 +70,8 @@ class SevenTween {
         this._overwriteParams(target, toParams)
 
         // If we want to set IMMEDIATELY.
+        // @TODO: Need to use the proper rendering the same way we are doing inside tweens, at least for style.x mappings
+        // Alternatively could just create tween with 0 duration??... nah sounds bad.
         if(duration === 0) {
             for(let p in toParams) {
                 target[p] = toParams[p]
@@ -194,8 +196,8 @@ class SevenTween {
                 tween._timeEllapsed = tween._duration * 1000
             } 
 
-            // Render
-            tween._render()
+            // Tween and render to target
+            tween._tween()
             
 
             // Run onUpdate callback and pass it the current progress [0, 1]

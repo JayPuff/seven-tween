@@ -10,3 +10,14 @@ Tween between colors and units and %s, <---
 Take HTMLElements as targets,
 Take Array targets (make many tweens and return a function that kills all of them??? is that it??? no... onComplete gets complicated etc.)
 Don't run step unless we have tweens queued / ongoing <--- DONE
+
+
+
+Things on my mind right now:
+DOM Mapping => color -> style.color, rotation -> style.transform = rotate(rotation.deg)
+Nested Props => Seems hard and introduces a lot of error checking...
+Formatter for string value   <----- DONE
+Tween from types of value <----- related to DOM px -> em, px -> %, % -> px, % -> number?, number -> px?
+Set needs to be made sure that it renders the same way _render does internally (problem is right now, no tween is created which is good I think.)
+Need to handle target, or props that stop existing, didn't think this one too deep but keep an eye out to cancel active params or tweens entirely.
+if I say on a DOM element -> top: 30, it should know to format to px by default...

@@ -1,8 +1,12 @@
 # Seven Tween
 Ideally, the smallest possible useful library for tweening values on JS objects that works on both node, and browser.
-Anything extra should be left to some sort of plugin like system: CSS, timelines, etc
 
-Currently considering basic DOM property tweening. As of now, simply use a tweened value within the onUpdate handler and do all CSS rendering there.
+Supports Basic CSS property tweening on DOM objects.
+Unsupported as of now: transform properties such as scale, rotate, skew, different unit tweening such as 20px to 100%. For the former case you can manually render using the onUpdate function and setting style.transform of a DOM element to what you need while tweening a plain object. For the latter, make sure you always do a fromTo but this will be supported soon.
+
+Also unsupported for now: Color tweens; use a simple object with a property for each color (r,g,b).
+
+Also unsupported: Nested property tweening; Not on the roadmap before any of the other fixes.
 
 
 # Installation
